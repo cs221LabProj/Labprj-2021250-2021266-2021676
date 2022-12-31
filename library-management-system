@@ -1,0 +1,433 @@
+// CS221 Lab project
+
+/*project description:
+
+    Library Management System
+    Data structures used: Queues, Linked Lists
+    Linked Lists are used to store books
+    Queues store student IDs the waiting list for book thats already issued
+*/
+
+#include <iostream>
+#include <string>
+using namespace std;
+
+// class of queue storing all utility functions
+// used to maintain a record of people on waiting list for a book that is already issued
+class Queue
+{
+
+    struct Node
+    {
+        int data;
+        Node *next;
+
+        Node()
+        {
+            next = NULL;
+        }
+    };
+    Node *ListHeadPtr;
+
+public:
+    // constructor
+    Queue()
+    {
+        ListHeadPtr = NULL; // head ptr is initialised as null
+    }
+    // utilitly function to check if the queue is empty
+    bool isEmpty()
+    {
+        if (ListHeadPtr == NULL)
+            return true;
+        else
+            return false;
+    }
+    // utility function to add node at head
+    void AddNode(int val)
+    {
+
+        Node *ptrNew = new Node;
+        ptrNew->data = val;
+        ptrNew->next = ListHeadPtr;
+        ListHeadPtr = ptrNew;
+    }
+    // utility function to return data of the last node
+    int returnLastNode()
+    {
+        Node *ptrTemp = ListHeadPtr;
+
+        if (ListHeadPtr == NULL)
+        {
+            return 0;
+        }
+        if (ListHeadPtr->next = NULL) // if data is at headptr
+        {
+            return ptrTemp->data;
+        }
+
+        while (ptrTemp->next != NULL)
+        {
+            ptrTemp = ptrTemp->next;
+        }
+
+        return ptrTemp->data;
+    }
+
+    void removeNode() // utility to removes last node from queue
+    {
+        Node *ptrTemp = ListHeadPtr, *prev = new Node();
+
+        if (ListHeadPtr == NULL)
+        {
+            cout << "queue is empty\n";
+        }
+        if (ListHeadPtr->next = NULL) // if we have to delete head ptr
+        {
+            ListHeadPtr = NULL; // set head ptr equal to NULL
+        }
+
+        while (ptrTemp->next != NULL) // if ptr next is null
+        {
+            prev = ptrTemp;          // set prev equal to temp
+            ptrTemp = ptrTemp->next; // move ptr to prt->next
+        }
+
+        prev->next = NULL;
+        // delete ptrTemp;
+    }
+
+    void displayQueue(void) // utility function to display all elements of queue
+    {
+        Node *ptrTemp = ListHeadPtr; // temp pointer pointing to head
+        cout << endl;
+
+        while (ptrTemp != NULL) // loop traverses until it reaches the end of the queue
+        {
+            cout << ptrTemp->data << ",";
+            ptrTemp = ptrTemp->next;
+        }
+    }
+    void DeleteNode(int key) // utility function to delete node
+    {
+        Node *ptrCurrent = ListHeadPtr, *ptrPrevious;
+
+        while (ptrCurrent != NULL && ptrCurrent->data != key) // searches for key in the list and delete it
+        {
+            ptrPrevious = ptrCurrent;
+            ptrCurrent = ptrCurrent->next;
+        }
+
+        if (ptrCurrent == NULL) // if ptr is equal to null, means no book was stored in the list
+        {
+            cout << "\nElement to delete not found in the list";
+            return;
+        }
+
+        if (ptrCurrent == ListHeadPtr) // node to delete is first node​
+            ListHeadPtr = ListHeadPtr->next;
+
+        else // node to delete is in middle or at end of list​
+        {
+            ptrPrevious->next = ptrCurrent->next;
+        }
+        delete ptrCurrent;
+    }
+};
+
+struct Node // stores details of the book
+{
+    int id;                  // book ID
+    string BookName, author; // name of book, name of author
+    Node *next;              // stores the address of the next book in the linked list
+    int borrowed;            // stores reg number of person who borrowed it, or 0 if no one has borrowed it
+    Queue waitingList;       // stores the reg number in the waiting list for the book if already borrowed
+
+    Node() // constructor to initialise the default information for a book (represents an empty slot)
+    {
+        id = -1;
+        BookName = " ";
+        author = " ";
+        this->next = NULL;
+        borrowed = 0;
+    }
+};
+
+class SingleLinkedList // main linked list storing info of all the books in library
+{
+
+public:
+    Node *head;
+
+    SingleLinkedList()
+    {
+        head = NULL;
+    }
+
+    void printAll() // function to print info of a books stored in the linked list
+    {
+        Node *tmp = head;
+        while (tmp != NULL)
+        {
+            cout << "Book title:" << tmp->BookName << "\nAuthor: " << tmp->author << "\nBook ID: " << tmp->id << endl
+                 << endl;
+            tmp = tmp->next;
+        }
+    }
+
+    void addNodeAtHead(string name, string athr, int Id) // new book is added to the root node
+    {
+        Node *tmp = new Node; // create new node to be added
+        tmp->BookName = name;
+        tmp->author = athr;
+        tmp->id = Id;
+
+        tmp->next = head; // new node next pointer (tmp)
+        head = tmp;
+    }
+
+    Node *find(int ID, bool findPrev = false)
+    // function to search book.
+    // if book is found
+    {
+        // pointer to the node that we to find
+        Node *prevNode = NULL;
+        bool found = false;
+        for (prevNode = head; prevNode->next != NULL; prevNode = prevNode->next)
+        {
+            // if value is found
+            if (prevNode->next->id == ID)
+            {
+                found = true;
+                break;
+            }
+        }
+        if (found) // return node if found
+        {
+            if (findPrev)
+                return prevNode;
+            else
+                return prevNode->next;
+        }
+        else
+            return NULL;
+    }
+
+    void show(int bookid) // shows details of the book
+    {
+        Node *temp = head; // a temp ptr pointing to temp
+
+        while (temp != NULL) // loop to traverses until it reaches the end of link list
+        {
+            if (temp->id == bookid) // if book id matches with the pointers id
+            {
+                cout << "Book title:" << temp->BookName << "\nAuthor: " << temp->author << "\nBook ID: " << temp->id << endl;
+                return;
+            }
+
+            temp = temp->next;
+        }
+    }
+
+    bool found(int bookid) // bool function which checks for the availability of a book
+                           //  we search for the book using book id
+    {
+        Node *temp = head;
+
+        while (temp != NULL)
+        {
+            if (temp->id == bookid)
+                return true;
+
+            temp = temp->next;
+        }
+
+        return false;
+    }
+
+    void borrow(int bookid, int regnum) // function to borrow book
+    {
+        Node *temp = head; // temp ptr pointing to head of the list
+        bool found = false;
+
+        while (temp != NULL)
+        {
+            if (temp->id == bookid)
+            {
+                found = true;
+                break;
+            }
+
+            temp = temp->next;
+        }
+
+        if (found)
+        {
+            if (temp->borrowed == 0) // if a book is available ,its borrowed would be zero, else it would have the regnumber student who borrowed it
+            // if book is not borrowed already, set the head node's borrowed as regnumber
+            {
+                temp->borrowed = regnum;
+                cout << "book borrowed\n";
+            }
+            else
+            {
+                cout << "book already borrowed\n";
+                int ch = 0;
+                cout << "Press 1 to enter the queue for the book\n";
+                cin >> ch;
+
+                if (ch == 1)
+                {
+                    temp->waitingList.AddNode(regnum); // adds student to the waiting list for the book
+                }
+            }
+        }
+        else
+            cout << "book not found\n";
+    }
+
+    void returnBook(int regnum, int bookid) // function to return book to the library
+    {
+        Node *temp = head;
+        bool found = false;
+
+        while (temp != NULL)
+        {
+            if (temp->id == bookid)
+            {
+                found = true;
+                break;
+            }
+
+            temp = temp->next;
+        }
+
+        if (found)
+        {
+            if (temp->borrowed == regnum) // checks if the student returning the book is the same as the one who borrowed the book
+            {
+                cout << "book successfully returned\n";
+                if (temp->waitingList.isEmpty()) // if waiting list is empty, borrowed returns to 0
+                    temp->borrowed = 0;
+                else
+                {
+                    temp->borrowed = temp->waitingList.returnLastNode(); // else first person in queue gets to borrow the book
+                    // the next person is removed from the queue and gets to issue the book
+                    temp->waitingList.removeNode();
+                }
+            }
+        }
+    }
+};
+
+class BookList // class that represents the library
+{
+public:
+    SingleLinkedList books;
+
+    void printAll() // function to print information of all books in the library
+    {
+        books.printAll();
+    }
+
+    void
+    addBook() // function to add book to the library
+    {
+        int bookid;
+        bool found = false;
+        string name, athr;
+
+        cout << "Enter book name\n";
+        cin >> name;
+        cout << "Enter author's name\n";
+        cin >> athr;
+
+        while (1)
+        {
+            cout << "Enter book ID.\n";
+            cin >> bookid;
+            if (books.found(bookid)) // checks to make sure book has unique id
+            {
+                cout << "Book with this ID already exists. enter again\n";
+            }
+            else
+            {
+                books.addNodeAtHead(name, athr, bookid);
+                break;
+            }
+        }
+    }
+
+    void ShowBook() // function to show details of a particular book
+    {
+        int i = 0, bookid;
+        cout << "enter book ID to find a particular book\n";
+        cin >> bookid;
+
+        books.show(bookid);
+    }
+};
+
+int main()
+{
+    int option;  // choice for our menu
+    BookList b1; // instance of linked list that will be acting as our library
+
+    do
+    {
+        //  menu to explore functions of the library
+        cout << "*** MAIN MENU ***\n";
+        cout << "1-Add a new book\n";
+        cout << "2-Show particular book\n3-Show all books\n";
+        cout << "4-Borrow a book\n5-return a book\n";
+        cout << "0-Exit\n";
+        cin >> option;
+
+        if (option == 0)
+        {
+            break;
+        }
+        else if (option == 1)
+        { // book is getting added to the library
+            b1.addBook();
+        }
+        else if (option == 2)
+        { // function to show if a particular book from the library
+            b1.ShowBook();
+            int choice;
+        }
+        else if (option == 3)
+        { // option to print details of all books of the library
+            b1.printAll();
+        }
+        else if (option == 4)
+        {
+            // option to borrow book
+            // requires reg number and the id of book to be borrowed
+            int regno, bookid;
+            cout << "enter your reg number\n";
+            cin >> regno;
+            cout << "enter book id\n";
+            cin >> bookid;
+            b1.books.borrow(bookid, regno);
+        }
+
+        else if (option == 5)
+        { // option to return book
+            int regno, bookid;
+            cout << "enter your reg number\n";
+            // requires regnumber to make sure if the reg number
+            // stored at borrow is the same as the one that is present is the books borrowed id
+            cin >> regno;
+            cout << "enter book id\n";
+            cin >> bookid;
+            b1.books.returnBook(regno, bookid);
+        }
+
+        // else
+        //    {  cout << "Wrong option. Try again\n";}
+
+    } while (option != 0); // menu exits when option 0 is selected
+
+    return 0;
+}
